@@ -34,7 +34,7 @@ public class Precoce30s extends Robot {
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
-        fire(2);
+        fire(2); // Disparo com potência 2
         if (peek) {
             scan();
         }
