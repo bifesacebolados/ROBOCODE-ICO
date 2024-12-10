@@ -8,6 +8,7 @@ import java.awt.*;
 public class Precoce30s extends Robot {
     boolean peek; 
     double moveAmount;
+    boolean surrounded = false; // Verifica se está encurralado
 
     public void run() {
         setBodyColor(Color.black);
@@ -26,6 +27,9 @@ public class Precoce30s extends Robot {
         turnRight(90);
 
         while (true) {
+            if (surrounded) {
+                fire(3); // Disparo com potência 3 quando encurralado
+            }
             peek = true;
             ahead(moveAmount);
             peek = false;
@@ -43,8 +47,10 @@ public class Precoce30s extends Robot {
     public void onHitRobot(HitRobotEvent e) {
         if (e.getBearing() > -90 && e.getBearing() < 90) {
             back(100);
+            surrounded = true; // Marcar como encurralado
         } else {
             ahead(100);
+            surrounded = true; // Marcar como encurralado
         }
     }
 }
