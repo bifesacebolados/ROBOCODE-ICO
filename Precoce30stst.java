@@ -6,63 +6,44 @@ import robocode.ScannedRobotEvent;
 import java.awt.*;
 
 public class Precoce30s extends AdvancedRobot {
-    double wallMargin = 50; // Margem de segurança para evitar colisões com a parede
+    double wallMargin = 50; // Distância mínima das paredes
 
     public void run() {
-        // Configurações visuais do robô
+        // Configurações visuais
         setBodyColor(Color.black);
         setGunColor(Color.black);
         setRadarColor(Color.orange);
         setBulletColor(Color.cyan);
         setScanColor(Color.cyan);
 
+        // Ajuste inicial para alinhar com o contorno
+        goToWall();
+        turnRight(90); // Prepara para contornar as bordas
+
         // Loop principal
         while (true) {
-            moveAlongBorders();
+            followWall();
         }
     }
 
-    public void moveAlongBorders() {
-        double x = getX(); // Posição X atual
-        double y = getY(); // Posição Y atual
+    private void goToWall() {
+        // Move-se para a borda mais próxima
+        double heading = getHeading();
+        if (heading != 0) {
+            turnLeft(heading % 90); // Ajusta para alinhar com os eixos
+        }
+        ahead(Math.max(getBattleFieldWidth(), getBattleFieldHeight())); // Move-se até uma parede
+    }
 
+    private void followWall() {
+        // Movimento para contornar as bordas do mapa
+        double x = getX();
+        double y = getY();
         double battlefieldWidth = getBattleFieldWidth();
         double battlefieldHeight = getBattleFieldHeight();
 
-        // Detecta proximidade com as bordas e ajusta o movimento
-        if (x <= wallMargin) { // Próximo à borda esquerda
-            turnTo(90); // Virar para baixo
-        } else if (x >= battlefieldWidth - wallMargin) { // Próximo à borda direita
-            turnTo(270); // Virar para cima
-        } else if (y <= wallMargin) { // Próximo à borda inferior
-            turnTo(0); // Virar para direita
-        } else if (y >= battlefieldHeight - wallMargin) { // Próximo à borda superior
-            turnTo(180); // Virar para esquerda
-        }
+        if (x <= wallMargin && getHeading() != 90) {
+            // Perto da parede esquerda, vira para baixo
+            turnTo(90);
+        } else if (x >= battlefieldWidth - wallMargin && getHea
 
-        // Move para frente mantendo a lógica de bordas
-        ahead(100);
-    }
-
-    public void turnTo(double angle) {
-        // Gira suavemente para o ângulo especificado
-        double angleToTurn = angle - getHeading();
-        if (angleToTurn <= -180) {
-            angleToTurn += 360;
-        } else if (angleToTurn > 180) {
-            angleToTurn -= 360;
-        }
-        turnRight(angleToTurn);
-    }
-
-    public void onScannedRobot(ScannedRobotEvent e) {
-        // Atira nos robôs detectados
-        fire(2); // Disparo com potência 2
-        scan();  // Mantém o radar ativo
-    }
-
-    public void onHitRobot(HitRobotEvent e) {
-        // Reage ao colidir com outro robô
-        back(50); // Recuar para evitar colisões prolongadas
-    }
-}
