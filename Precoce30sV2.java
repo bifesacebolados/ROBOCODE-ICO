@@ -11,18 +11,18 @@ public class Precoce30sV2 extends AdvancedRobot {
     public void run() {
         setAdjustRadarForRobotTurn(true);
         peek = false;
-
+//
   
 		while (true) {
             // Efeito de piscar
             if (isBlinking) {
                 setBodyColor(Color.red);
-                setGunColor(Color.red);
-                setRadarColor(Color.red);
+                setGunColor(Color.black);
+                setRadarColor(Color.yellow);
             } else {
                 setBodyColor(Color.blue);
-                setGunColor(Color.blue);
-                setRadarColor(Color.blue);
+                setGunColor(Color.white);
+                setRadarColor(Color.red);
             }
             isBlinking = !isBlinking;
            
