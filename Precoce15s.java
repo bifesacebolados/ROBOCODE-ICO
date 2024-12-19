@@ -3,7 +3,7 @@ package Moves;
 import robocode.*;
 import java.awt.*;
 
-public class Precoce30sV2 extends AdvancedRobot {
+public class Precoce15s extends AdvancedRobot {
     boolean peek;
     long lastTime = 0;
     boolean isBlinking = false;
