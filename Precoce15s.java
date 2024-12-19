@@ -1,28 +1,45 @@
 package Moves;
 
-<<<<<<< HEAD
-import robocode.AdvancedRobot;
-import robocode.HitRobotEvent;
-import robocode.HitWallEvent;
+import robocode.*;
+import java.awt.*;
 
 public class Precoce30s extends AdvancedRobot {
-
     private boolean firstLap = true; // Controle da primeira volta
     private double margin = 40; // Margem para evitar colisões
     private boolean collisionRecovery = false; // Evitar repetição de ajuste ao colidir
+    private int colorIndex = 0; // Índice para alternar entre as cores
 
     @Override
     public void run() {
-        // Garante que o robô comece alinhado com a borda
+        setAdjustRadarForRobotTurn(true);
+
+        // Paleta de cores psicodélica
+        Color[] colors = {
+            Color.red,
+            Color.blue,
+            Color.green,
+            Color.yellow,
+            Color.magenta,
+            Color.cyan,
+            Color.orange,
+            Color.pink
+        };
+
+        // Movimento ao longo das bordas com piscadas psicodélicas
         alignToWall();
 
         while (true) {
-            // Movimenta-se ao longo das bordas
+            // Alterna as cores freneticamente
+            setBodyColor(colors[colorIndex % colors.length]);
+            setGunColor(colors[(colorIndex + 1) % colors.length]);
+            setRadarColor(colors[(colorIndex + 2) % colors.length]);
+            colorIndex++;
+
+            // Realiza o movimento
             if (firstLap) {
                 ahead(getMoveAmount() - margin); // Primeira volta com margem
                 firstLap = false; // Marca o fim da primeira volta
             } else {
-                // Movimenta suavemente ajustando pela posição e bordas
                 moveAlongWall();
             }
 
@@ -107,36 +124,3 @@ public class Precoce30s extends AdvancedRobot {
         }
     }
 }
-=======
-import robocode.*;
-import java.awt.*;
-
-public class Precoce15s extends AdvancedRobot {
-    boolean peek;
-    long lastTime = 0;
-    boolean isBlinking = false;
-
-    public void run() {
-        setAdjustRadarForRobotTurn(true);
-        peek = false;
-//
-  
-		while (true) {
-            // Efeito de piscar
-            if (isBlinking) {
-                setBodyColor(Color.red);
-                setGunColor(Color.black);
-                setRadarColor(Color.yellow);
-            } else {
-                setBodyColor(Color.blue);
-                setGunColor(Color.white);
-                setRadarColor(Color.red);
-            }
-            isBlinking = !isBlinking;
-           
-            execute();
-        }
-    }
-		}
- 
->>>>>>> COR
