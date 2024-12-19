@@ -6,8 +6,7 @@ import robocode.ScannedRobotEvent;
 import java.awt.*;
 
 public class Precoce30s extends AdvancedRobot {
-    boolean peek; 
-    double moveAmount;
+    double wallMargin = 50; // Margem de segurança para evitar colisões com a parede
 
     public void run() {
         // Configurações visuais do robô
@@ -17,24 +16,43 @@ public class Precoce30s extends AdvancedRobot {
         setBulletColor(Color.cyan);
         setScanColor(Color.cyan);
 
-        // Calcula o movimento máximo para atravessar o mapa
-        moveAmount = Math.max(getBattleFieldWidth(), getBattleFieldHeight());
-        peek = false;
-
-        // Alinha-se para andar pela borda
-        turnLeft(getHeading() % 90); // Alinha com o eixo
-        ahead(moveAmount);           // Move até a borda
-        turnRight(90);               // Prepara para contornar a borda
-
+        // Loop principal
         while (true) {
-            moveAlongWall();
+            moveAlongBorders();
         }
     }
 
-    public void moveAlongWall() {
-        // Move-se pela borda do mapa
-        ahead(moveAmount);           // Move uma grande distância
-        turnRight(90);               // Faz curva de 90 graus para contornar a borda
+    public void moveAlongBorders() {
+        double x = getX(); // Posição X atual
+        double y = getY(); // Posição Y atual
+
+        double battlefieldWidth = getBattleFieldWidth();
+        double battlefieldHeight = getBattleFieldHeight();
+
+        // Detecta proximidade com as bordas e ajusta o movimento
+        if (x <= wallMargin) { // Próximo à borda esquerda
+            turnTo(90); // Virar para baixo
+        } else if (x >= battlefieldWidth - wallMargin) { // Próximo à borda direita
+            turnTo(270); // Virar para cima
+        } else if (y <= wallMargin) { // Próximo à borda inferior
+            turnTo(0); // Virar para direita
+        } else if (y >= battlefieldHeight - wallMargin) { // Próximo à borda superior
+            turnTo(180); // Virar para esquerda
+        }
+
+        // Move para frente mantendo a lógica de bordas
+        ahead(100);
+    }
+
+    public void turnTo(double angle) {
+        // Gira suavemente para o ângulo especificado
+        double angleToTurn = angle - getHeading();
+        if (angleToTurn <= -180) {
+            angleToTurn += 360;
+        } else if (angleToTurn > 180) {
+            angleToTurn -= 360;
+        }
+        turnRight(angleToTurn);
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
@@ -45,10 +63,6 @@ public class Precoce30s extends AdvancedRobot {
 
     public void onHitRobot(HitRobotEvent e) {
         // Reage ao colidir com outro robô
-        if (e.getBearing() > -90 && e.getBearing() < 90) {
-            back(100);  // Recuar se estiver à frente
-        } else {
-            ahead(100); // Avançar se estiver atrás
-        }
+        back(50); // Recuar para evitar colisões prolongadas
     }
 }
