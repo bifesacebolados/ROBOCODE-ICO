@@ -3,7 +3,7 @@ package Moves;
 import robocode.*;
 import java.awt.*;
 
-public class Precoce30s extends AdvancedRobot {
+public class Precoce15s extends AdvancedRobot {
     private boolean firstLap = true; // Controle da primeira volta
     private double margin = 40; // Margem para evitar colisões
     private boolean collisionRecovery = false; // Evitar repetição de ajuste ao colidir
