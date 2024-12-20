@@ -1,144 +1,64 @@
 package Moves;
 
-import robocode.*;
+import robocode.Robot;
+import robocode.HitRobotEvent;
+import robocode.ScannedRobotEvent;
 import java.awt.*;
 
-public class Precoce30s extends AdvancedRobot {
-    private boolean firstLap = true; // Controle da primeira volta
-    private double margin = 40; // Margem para evitar colisões
-    private boolean collisionRecovery = false; // Evitar repetição de ajuste ao colidir
-    private int colorIndex = 0; // Índice para alternar entre as cores
+public class Precoce15s extends Robot {
+    boolean peek; 
+    double moveAmount;
+    long lastAggressiveTime = 0; // Para armazenar o tempo da última ação agressiva
 
-    @Override
     public void run() {
-        setAdjustRadarForRobotTurn(true);
+        // Definir cores do robô
+        setBodyColor(Color.black);
+        setGunColor(Color.black);
+        setRadarColor(Color.orange);
+        setBulletColor(Color.cyan);
+        setScanColor(Color.cyan);
 
-        // Paleta de cores psicodélica
-        Color[] colors = {
-            Color.red,
-            Color.blue,
-            Color.green,
-            Color.yellow,
-            Color.magenta,
-            Color.cyan,
-            Color.orange,
-            Color.pink
-        };
+        // Calcular a quantidade de movimento máxima possível
+        moveAmount = Math.max(getBattleFieldWidth(), getBattleFieldHeight());
+        peek = false;
 
-        // Movimento ao longo das bordas com piscadas psicodélicas
-        alignToWall();
+        // Alinhar à borda inicial
+        turnLeft(getHeading() % 90);
+        ahead(moveAmount);
+        peek = true;
+        turnGunRight(90);
+        turnRight(90);
 
+        // Loop principal de execução
         while (true) {
-            // Alterna as cores freneticamente
-            setBodyColor(colors[colorIndex % colors.length]);
-            setGunColor(colors[(colorIndex + 1) % colors.length]);
-            setRadarColor(colors[(colorIndex + 2) % colors.length]);
-            colorIndex++;
-
-            // Realiza o movimento
-            if (firstLap) {
-                ahead(getMoveAmount() - margin); // Primeira volta com margem
-                firstLap = false; // Marca o fim da primeira volta
-            } else {
-                moveAlongWall();
+            if (getTime() - lastAggressiveTime >= 30) {
+                lastAggressiveTime = getTime();
+                executeAggressiveMove();
             }
-
-            // Ajusta para a próxima borda
+            peek = true;
+            ahead(moveAmount);
+            peek = false;
             turnRight(90);
-
-            // Mira e atira no centro do campo
-            aimAndShootCenter();
         }
     }
 
-    /**
-     * Alinha o robô à borda inicial.
-     */
-    private void alignToWall() {
-        turnLeft(getHeading() % 90); // Alinha ao ângulo mais próximo da borda
-        ahead(getMoveAmount() - margin); // Move até a borda com margem
-        turnRight(90); // Prepara para mover na direção das bordas
+    private void executeAggressiveMove() {
+        ahead(150);  // Move-se para frente agressivamente
+        fire(3);     // Dispara com potência máxima permitida
     }
 
-    /**
-     * Move ao longo das bordas sem colidir.
-     */
-    private void moveAlongWall() {
-        double heading = getHeading();
-        double x = getX();
-        double y = getY();
-        double moveDistance;
-
-        if (heading == 0) { // Indo para o topo
-            moveDistance = getBattleFieldHeight() - y - margin;
-        } else if (heading == 90) { // Indo para a direita
-            moveDistance = getBattleFieldWidth() - x - margin;
-        } else if (heading == 180) { // Indo para baixo
-            moveDistance = y - margin;
-        } else if (heading == 270) { // Indo para a esquerda
-            moveDistance = x - margin;
-        } else {
-            moveDistance = getMoveAmount() - margin; // Movimento padrão
+    public void onScannedRobot(ScannedRobotEvent e) {
+        fire(2); // Disparo padrão ao avistar um robô
+        if (peek) {
+            scan(); // Continua escaneando se o robô estiver em "peek"
         }
-
-        // Executa o movimento com a distância calculada
-        ahead(moveDistance);
     }
 
-    /**
-     * Mira e atira no centro do campo de batalha.
-     */
-    private void aimAndShootCenter() {
-        double centerX = getBattleFieldWidth() / 2;
-        double centerY = getBattleFieldHeight() / 2;
-        double dx = centerX - getX();
-        double dy = centerY - getY();
-        double angleToCenter = Math.toDegrees(Math.atan2(dx, dy));
-        double gunTurn = Utils.normalRelativeAngleDegrees(angleToCenter - getGunHeading());
-
-        turnGunRight(gunTurn);
-        fire(1); // Ajuste a potência do tiro conforme necessário
-    }
-
-    /**
-     * Retorna a distância máxima para movimentação.
-     */
-    private double getMoveAmount() {
-        return Math.max(getBattleFieldWidth(), getBattleFieldHeight());
-    }
-
-    /**
-     * Lida com colisões contra paredes.
-     */
-    @Override
-    public void onHitWall(HitWallEvent event) {
-        back(20); // Recuar levemente
-        turnRight(45); // Ajustar o ângulo
-    }
-
-    /**
-     * Lida com colisões contra outros robôs.
-     */
-    @Override
-    public void onHitRobot(HitRobotEvent event) {
-        if (!collisionRecovery) { // Evitar repetição do ajuste
-            collisionRecovery = true; // Marca que estamos em recuperação
-
-            if (firstLap) {
-                // Ajusta a posição para retornar à borda
-                back(50); // Recuar levemente para evitar o robô
-                alignToWall(); // Reposicionar para a borda
-            } else {
-                // Reagir normalmente durante voltas subsequentes
-                back(20);
-                turnRight(45);
-            }
-
-            collisionRecovery = false; // Recuperação concluída
+    public void onHitRobot(HitRobotEvent e) {
+        if (e.getBearing() > -90 && e.getBearing() < 90) {
+            back(100); // Recuar se colidir de frente
         } else {
-            // Caso já esteja em recuperação, faça algo diferente
-            back(10); // Pequeno ajuste para sair do loop
-            turnLeft(30); // Altere o ângulo para variar o ajuste
+            ahead(100); // Avance se colidir de costas
         }
     }
 }
