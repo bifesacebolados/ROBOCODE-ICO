@@ -31,11 +31,11 @@ public class Precoce15s extends Robot {
 
             if (getTime() - lastTime >= 30) {
                 lastTime = getTime();
-                ahead(150); // Movimento agressivo
-                fire(3);    // Disparo agressivo enquanto se movimenta
+                fire(3); // Disparo agressivo enquanto se movimenta
                 turnGunRight(360); // Procura alvos
             }
 
+            // Continua a movimentação
             peek = true;
             ahead(moveAmount);
             peek = false;
@@ -68,6 +68,7 @@ public class Precoce15s extends Robot {
         // Dispara baseado na distância
         fire(bulletPower);
 
+        // Escaneia novamente se o robô estiver no estado de "peek"
         if (peek) {
             scan();
         }
@@ -98,3 +99,4 @@ public class Precoce15s extends Robot {
         return angle;
     }
 }
+
